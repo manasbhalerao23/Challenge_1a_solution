@@ -12,15 +12,15 @@ from xgboost import XGBClassifier
 
 INPUT_FOLDER = sys.argv[1] 
 OUTPUT_FOLDER = sys.argv[2]  
+SUMMARY_FOLDER = sys.argv[3]
 MODEL_PATH = "extractor/xgb_heading_classifier.pkl"
 ENCODER_PATH = "extractor/label_encoder.pkl"
 
 
 FEATURE_COLUMNS = [
     'page', 'font_size', 'is_bold', 'x0', 'x1', 'top', 'width',
-    'line_no', 'space_above', 'space_below',
-    'word_count', 'is_uppercase_ratio', 'bottom',
-    'num_count', 'punctuation', 'is_landscape'
+    'line_no', 'space_above', 'space_below', 'word_count', 'num_count',
+    'punctuation', 'is_landscape', 'bottom', 'is_multilingual'
 ]
 
 
@@ -215,6 +215,7 @@ def add_text_features(df):
 
 def predict_labels(df, model_path, encoder_path):
     """Predict labels using trained XGBoost model"""
+    df['is_multilingual'] = 0  
     model = joblib.load(model_path)
     label_encoder = joblib.load(encoder_path)
     
@@ -280,7 +281,7 @@ def determine_heading_level(current_row, all_headings):
 
 
 
-def process_single_pdf(pdf_path, output_folder, model_path, encoder_path):
+def process_single_pdf(pdf_path, output_folder,summary_folder, model_path, encoder_path):
     """Process a single PDF through the complete pipeline"""
     pdf_name = Path(pdf_path).stem
    
@@ -293,7 +294,7 @@ def process_single_pdf(pdf_path, output_folder, model_path, encoder_path):
     df = predict_labels(df, model_path, encoder_path)
     
     
-    csv_path = os.path.join(output_folder, f"{pdf_name}.csv")
+    csv_path = os.path.join(summary_folder, f"{pdf_name}.csv")
     df.to_csv(csv_path, index=False, encoding='utf-8-sig')
    
 
@@ -306,12 +307,12 @@ def process_single_pdf(pdf_path, output_folder, model_path, encoder_path):
     return csv_path, json_path
 
 
-def process_all_pdfs(input_folder, output_folder, model_path, encoder_path):
+def process_all_pdfs(input_folder, output_folder,summary_folder, model_path, encoder_path):
     """Process all PDFs in the input folder"""
     
     os.makedirs(output_folder, exist_ok=True)
-    
-    
+    os.makedirs(summary_folder, exist_ok=True)
+
     pdf_files = list(Path(input_folder).glob("*.pdf"))
     
     if not pdf_files:
@@ -324,7 +325,7 @@ def process_all_pdfs(input_folder, output_folder, model_path, encoder_path):
     for pdf_path in pdf_files:
         try:
             csv_path, json_path = process_single_pdf(
-                str(pdf_path), output_folder, model_path, encoder_path
+                str(pdf_path), output_folder,summary_folder, model_path, encoder_path
             )
             processed_files.append({
                 'pdf': str(pdf_path),
@@ -337,7 +338,7 @@ def process_all_pdfs(input_folder, output_folder, model_path, encoder_path):
     
     
     
-    summary_path = os.path.join(output_folder, "processing_summary.json")
+    summary_path = os.path.join(summary_folder, "processing_summary.json")
     with open(summary_path, 'w', encoding='utf-8') as f:
         json.dump({
             'total_processed': len(processed_files),
@@ -360,4 +361,4 @@ if __name__ == "__main__":
         exit(1)
     
 
-    process_all_pdfs(INPUT_FOLDER, OUTPUT_FOLDER, MODEL_PATH, ENCODER_PATH)
+    process_all_pdfs(INPUT_FOLDER, OUTPUT_FOLDER,SUMMARY_FOLDER, MODEL_PATH, ENCODER_PATH)
