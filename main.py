@@ -200,7 +200,6 @@ def merge_buffer(buffer, group_id):
 
 
 def add_text_features(df):
-    """Add digit count and punctuation count features"""
     def count_digits(text):
         return sum(char.isdigit() for char in str(text))
 
@@ -214,8 +213,11 @@ def add_text_features(df):
 
 
 def predict_labels(df, model_path, encoder_path):
-    """Predict labels using trained XGBoost model"""
-    df['is_multilingual'] = 0  
+    def is_multilingual_text(text):
+        pattern = r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\uAC00-\uD7AF\u1100-\u11FF\u0900-\u097F]'
+        return 1 if re.search(pattern, str(text)) else 0
+    
+    df['is_multilingual'] = df['text'].apply(is_multilingual_text)
     model = joblib.load(model_path)
     label_encoder = joblib.load(encoder_path)
     
@@ -235,7 +237,6 @@ def predict_labels(df, model_path, encoder_path):
 
 
 def generate_outline_json(df, pdf_name):
-    """Generate JSON outline from labeled DataFrame"""
 
     titles = df[df['label'] == 'Title']['text'].dropna().str.strip()
     title_text = " | ".join(titles) if not titles.empty else pdf_name
@@ -265,7 +266,6 @@ def generate_outline_json(df, pdf_name):
 
 
 def determine_heading_level(current_row, all_headings):
-    """Determine the hierarchical level of a heading"""
     font_size = current_row['font_size']
     is_bold = current_row['is_bold']
     
@@ -282,7 +282,6 @@ def determine_heading_level(current_row, all_headings):
 
 
 def process_single_pdf(pdf_path, output_folder,summary_folder, model_path, encoder_path):
-    """Process a single PDF through the complete pipeline"""
     pdf_name = Path(pdf_path).stem
    
     df = extract_text_blocks(pdf_path)
@@ -308,7 +307,6 @@ def process_single_pdf(pdf_path, output_folder,summary_folder, model_path, encod
 
 
 def process_all_pdfs(input_folder, output_folder,summary_folder, model_path, encoder_path):
-    """Process all PDFs in the input folder"""
     
     os.makedirs(output_folder, exist_ok=True)
     os.makedirs(summary_folder, exist_ok=True)
