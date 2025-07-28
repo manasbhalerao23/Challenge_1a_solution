@@ -7,3 +7,4 @@ output/
 *.pt
 *.onnx
 summary/
+input/
