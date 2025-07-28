@@ -11,17 +11,20 @@ Extract Title, H1, H2, and H3 headings from diverse travel-related PDFs using cl
 
 1. **PDF Parsing**:
    - Use `PyMuPDF` (`fitz`) to extract text blocks, font sizes, styles, and positions from each page.
+   - Creating a Grouping policy to maintain the content of same paragraph together.
 
 2. **Feature Engineering**:
    - Generate features like:
      - Font size
+     - Page
      - Font weight (bold/regular)
-     - Uppercase ratio
      - Indentation
-     - Line spacing
-     - Text position on page
-     - Word count and character count
-     - For Japanese: segmentation features via `TinySegmenter` and `Jibea`
+     - Line spacing (space above, space below)
+     - Text position on page (x0,x1,top,bottom)
+     - Word count and Width
+     - Multinlingual check using regex (is_multilingual)
+     - Count of numbers and punctuation
+     - Line number in a Page
 
 3. **Heading Classification**:
    - Used a trained `XGBoost` model to classify each text block into one of:
@@ -36,7 +39,7 @@ Extract Title, H1, H2, and H3 headings from diverse travel-related PDFs using cl
 ##  Model
 
 - **Algorithm**: XGBoost Classifier
-- **Trained on**: Hand-labeled heading data from sample travel PDFs
+- **Trained on**: Hand-labeled heading data from sample many PDFs
 - **Inputs**: Feature vector extracted from PDF layout and text
 - **Outputs**: Heading level classification (Title, H1, H2, H3)
 
@@ -53,8 +56,6 @@ Model files:
 - `scikit-learn` – Label encoding and preprocessing
 - `pandas` – Data manipulation
 - `numpy` – Numerical operations
-- `TinySegmenter` – Japanese segmentation
-- `jibea` – BERT-based Japanese feature support
 - `joblib` – Model serialization
 
 ---
