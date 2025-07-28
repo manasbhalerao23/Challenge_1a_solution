@@ -74,7 +74,7 @@ docker build --platform linux/amd64 -t challenge_1a:solutionidentifier .
 ### Run Docker Container
 
 ```bash
-docker run --rm -v "$(pwd)/input:/app/input" -v "$(pwd)/output:/app/output" challenge_1b:solutionidentifier
+docker run --rm -v "$(pwd)/input:/app/input" -v "$(pwd)/output:/app/output" challenge_1a:solutionidentifier
 ```
 
 ---
