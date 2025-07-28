@@ -60,6 +60,9 @@ Model files:
 ---
 
 ##  How to Build and Run using Docker
+### Prepare Input Folder
+
+Before running the Docker container, create an `input/` folder in the project directory and add all the PDF files to be tested inside it.
 
 ### Build Docker Image
 
@@ -76,6 +79,8 @@ docker run --rm -v "$(pwd)/input":/app/input -v "$(pwd)/output":/app/output chal
 ---
 
 ##  Output Format
+
+ The output will be in a output folder as output_docs.json.
 
 Example:
 
